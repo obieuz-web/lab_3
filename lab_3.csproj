@@ -48,12 +48,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="tabela.xhtml" />
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
-    <Content Include="cars.xml" />
-    <Content Include="CarsFromLinq.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

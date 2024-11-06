@@ -2,11 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.ConstrainedExecution;
-using System.Runtime.InteropServices;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
@@ -17,7 +12,7 @@ namespace lab_3
     internal class Program
     {
         static XmlSerializer serializer;
-        static string filePath;
+        static string cars_file_path;
         static void Main(string[] args)
         {
             List<Car> myCars = CreateCarsList();
@@ -42,13 +37,19 @@ namespace lab_3
 
             #region ZAD2
 
-            filePath = "C:\\Users\\robiz\\source\\repos\\lab_3\\cars.xml";
+            cars_file_path = "cars.xml";
+
+            if (!File.Exists(cars_file_path))
+            {
+                using (FileStream fs = File.Create(cars_file_path)) ;
+            }
 
             XmlRootAttribute rootAttribute = new XmlRootAttribute("cars");
             serializer = new XmlSerializer(typeof(List<Car>), rootAttribute);
 
-            //SerializeCars(myCars);
+            SerializeCars(myCars);
 
+            Console.WriteLine("Samochody z pliku");
             foreach (var item in DeserializeCars())
             {
                 Console.WriteLine($"{item.model} \t {item.year} \t {item.motor.model}");
@@ -60,6 +61,8 @@ namespace lab_3
 
             Console.WriteLine($"Średnia ilość koni mechanicznych {CountAverageHorsePower()}");
 
+
+            Console.WriteLine("Modele samochodów bez powtórzeń");
             foreach( var i in GetDistinctCars())
             {
                 Console.WriteLine(i);
@@ -98,23 +101,21 @@ namespace lab_3
         }
         static void SerializeCars(List<Car> cars)
         {
-            using (StreamWriter writer = new StreamWriter(filePath))
+            using (StreamWriter writer = new StreamWriter(cars_file_path))
             {
                 serializer.Serialize(writer, cars);
             }
         }
         static List<Car> DeserializeCars()
         {
-            List<Car> cars;
-            using (StreamReader reader = new StreamReader(filePath))
+            using (StreamReader reader = new StreamReader(cars_file_path))
             {
-                cars = (List<Car>)serializer.Deserialize(reader);
+                return (List<Car>)serializer.Deserialize(reader);
             }
-            return cars;
         }
         static double CountAverageHorsePower()
         {
-            XElement rootNode = XElement.Load(filePath);
+            XElement rootNode = XElement.Load(cars_file_path);
 
             double sum = (double)rootNode.XPathEvaluate("sum(//car/engine[@model != 'TDI']/horsePower)");
             double count = (double)rootNode.XPathEvaluate("count(//car/engine[@model != 'TDI']/horsePower)");
@@ -125,7 +126,7 @@ namespace lab_3
         {
             List<string> modelsDistinct = new List<string>();
 
-            XElement rootNode = XElement.Load(filePath);
+            XElement rootNode = XElement.Load(cars_file_path);
 
             var models = rootNode.XPathSelectElements("//car/model");
 
@@ -152,11 +153,16 @@ namespace lab_3
                     new XElement("year", car.year)
                 );
             });
-            XElement rootNode = new XElement("cars", nodes); 
+            XElement rootNode = new XElement("cars", nodes);
 
-            string path_to_cars_from_linq = "C:\\Users\\robiz\\source\\repos\\lab_3\\CarsFromLinq.xml";
+            string filePath = "CarsFromLinq.xml";
 
-            rootNode.Save(path_to_cars_from_linq);
+            if(!File.Exists(filePath))
+            {
+                using (FileStream fs = File.Create(filePath)) ;
+            }
+            rootNode.Save(filePath);
+            Console.WriteLine($"Stworzono plik {filePath}");
         }
         static void createTableFromLinq(List<Car> cars)
         {
@@ -172,15 +178,24 @@ namespace lab_3
             });
             XElement rootNode = new XElement("table", nodes);
 
-            string path_to_xhtml_file = "C:\\Users\\robiz\\source\\repos\\lab_3\\tabela.xhtml";
+            string filePath = "tabela.xhtml";
+
+            if (!File.Exists(filePath))
+            {
+                using (FileStream fs = File.Create(filePath)) ;
+            }
 
             XNamespace xmlns = "http://www.w3.org/1999/xhtml";
 
-            XDocument table = XDocument.Load(path_to_xhtml_file);
+            XDocument table = XDocument.Parse(
+                "<!--?xml version=\"1.0\" encoding=\"utf-8\"?-->\r\n<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\"\r\n\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">\r\n<html xmlns=\"http://www.w3.org/1999/xhtml\" xml:lang=\"pl\" lang=\"pl\"><head>\r\n <title>Cars</title>\r\n <meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"/>\r\n </head>\r\n <body>\r\n </body>\r\n</html>"
+                );
 
             table.Root.Element(xmlns + "body").Add(rootNode);
 
-            table.Save(path_to_xhtml_file);
+            table.Save(filePath);
+
+            Console.WriteLine($"Stworzono tabele w pliku {filePath}");
         }
     }
     [XmlType("car")]
