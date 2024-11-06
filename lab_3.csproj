@@ -51,6 +51,7 @@
     <None Include="tabela.xhtml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include=".gitignore" />
     <Content Include="cars.xml" />
     <Content Include="CarsFromLinq.xml" />
   </ItemGroup>

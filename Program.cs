@@ -116,16 +116,10 @@ namespace lab_3
         {
             XElement rootNode = XElement.Load(filePath);
 
-            var horsepowers = rootNode.XPathSelectElements("//car/engine[@model != 'TDI']/horsePower");
+            double sum = (double)rootNode.XPathEvaluate("sum(//car/engine[@model != 'TDI']/horsePower)");
+            double count = (double)rootNode.XPathEvaluate("count(//car/engine[@model != 'TDI']/horsePower)");
 
-            double sum = 0;
-
-            foreach (var item in horsepowers)
-            {
-                sum += double.Parse(item.Value);
-            }
-
-            return sum / horsepowers.Count();
+            return sum / count;
         }
         static List<string> GetDistinctCars()
         {
